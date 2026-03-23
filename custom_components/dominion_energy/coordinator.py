@@ -303,6 +303,10 @@ class DominionEnergyCoordinator(DataUpdateCoordinator[DominionEnergyData]):
         except CannotConnectError as err:
             raise UpdateFailed(f"Cannot connect to Dominion Energy API: {err}") from err
         except ApiError as err:
+            if err.status_code in (401, 403):
+                raise ConfigEntryAuthFailed(
+                    "Authentication failed - please re-authenticate"
+                ) from err
             raise UpdateFailed(f"API error: {err}") from err
 
     def _calculate_cost(
